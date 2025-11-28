@@ -1,0 +1,40 @@
+{% extends "shop/base.html" %}
+
+{% block title %}批量导入评价{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h2>批量导入评价</h2>
+                </div>
+                <div class="card-body">
+                    <p>此功能仅限超级管理员使用，用于通过上传CSV文件批量为订单添加评价。</p>
+                    <p>CSV文件必须包含以下列：</p>
+                    <ul>
+                        <li><strong>order_id</strong> (必需): 需要添加评价的订单ID。</li>
+                        <li><strong>rating</strong> (必需): 1到5之间的整数评分。</li>
+                        <li><strong>comment</strong> (可选): 文本评论内容。</li>
+                        <li><strong>created_at</strong> (可选): 评价创建的时间 (格式: YYYY-MM-DD HH:MM:SS)。如果留空，则使用当前时间。</li>
+                    </ul>
+                    <div class="alert alert-warning" role="alert">
+                        <strong>注意:</strong> 整个上传过程将在一个事务中完成。如果文件中任何一行数据有误（例如，订单ID不存在、订单已有评价、评分格式错误），所有评价的导入都将被取消。
+                    </div>
+                    <hr>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="csv_file" class="form-label">选择CSV文件</label>
+                            <input class="form-control" type="file" id="csv_file" name="csv_file" accept=".csv" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">上传并导入评价</button>
+                        <a href="{% url 'shop:shop_list' %}" class="btn btn-secondary">返回首页</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

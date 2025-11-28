@@ -1,0 +1,82 @@
+{% extends "shop/base.html" %}
+
+{% block title %}批量更新商品图片{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h2>批量更新商品图片</h2>
+                </div>
+                <div class="card-body">
+                    <p>此功能允许您为多个商品批量上传和设置图片。</p>
+                    <ul>
+                        <li><strong>上传一张图片:</strong> 将这张图片应用到所有选定范围的商品上。</li>
+                        <li><strong>上传多张图片:</strong> 系统将从您上传的图片中随机选择一张，应用到每个选定范围的商品上。</li>
+                    </ul>
+                    <hr>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label"><strong>第一步：选择更新范围</strong></label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="update_type" id="all_products" value="all" checked>
+                                <label class="form-check-label" for="all_products">
+                                    店铺中的所有商品
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="update_type" id="by_category" value="category">
+                                <label class="form-check-label" for="by_category">
+                                    按分类选择商品
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3" id="category_selector" style="display: none;">
+                            <label for="category" class="form-label">选择商品分类</label>
+                            <select class="form-select" name="category" id="category">
+                                <option value="">-- 请选择一个分类 --</option>
+                                {% for category in categories %}
+                                    <option value="{{ category.pk }}">{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="images" class="form-label"><strong>第二步：上传图片</strong></label>
+                            <input class="form-control" type="file" id="images" name="images" multiple accept="image/*" required>
+                            <div class="form-text">您可以按住 Ctrl (或 Cmd) 键来选择多张图片。</div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">开始更新</button>
+                        <a href="{% url 'shop:merchant_dashboard' %}" class="btn btn-secondary">返回</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const updateTypeRadios = document.querySelectorAll('input[name="update_type"]');
+    const categorySelector = document.getElementById('category_selector');
+
+    updateTypeRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'category') {
+                categorySelector.style.display = 'block';
+            } else {
+                categorySelector.style.display = 'none';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

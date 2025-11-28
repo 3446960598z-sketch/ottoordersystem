@@ -1,0 +1,24 @@
+{% extends "shop/base.html" %}
+{% block title %}配送历史与收入{% endblock %}
+
+{% block content %}
+  <h1 class="mb-4">配送历史与收入</h1>
+
+  <div class="card bg-success text-white mb-4">
+    <div class="card-body">
+      <h5 class="card-title">总收入</h5>
+      <p class="card-text fs-4">¥{{ total_earnings|floatformat:2 }}</p>
+    </div>
+  </div>
+
+  <h4>已完成订单</h4>
+  <ul class="list-group">
+    {% for order in completed_orders %}
+      <a href="{% url 'shop:order_detail' order.pk %}" class="list-group-item list-group-item-action">
+        订单 #{{ order.id }} - 送达于 {{ order.delivered_at|date:"Y-m-d H:i" }}
+      </a>
+    {% empty %}
+      <li class="list-group-item">您还没有完成任何订单。</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "shop/base.html" %}
+{% block title %}我的客服工单{% endblock %}
+
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>我的客服工单</h1>
+    <a href="{% url 'shop:ticket_create' %}" class="btn btn-primary">创建新工单</a>
+  </div>
+
+  <div class="list-group">
+    {% for ticket in tickets %}
+      <a href="{% url 'shop:ticket_detail' ticket.pk %}" class="list-group-item list-group-item-action">
+        <div class="d-flex w-100 justify-content-between">
+          <h5 class="mb-1">#{{ ticket.id }} - {{ ticket.subject }}</h5>
+          <small>{{ ticket.created_at|date:"Y-m-d" }}</small>
+        </div>
+        <p class="mb-1">状态: <span class="badge bg-{% if ticket.status == 'OPEN' %}success{% elif ticket.status == 'IN_PROGRESS' %}info{% else %}secondary{% endif %}">{{ ticket.get_status_display }}</span></p>
+      </a>
+    {% empty %}
+      <p>您还没有提交任何客服工单。</p>
+    {% endfor %}
+  </div>
+{% endblock %}

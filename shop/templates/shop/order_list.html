@@ -1,0 +1,50 @@
+{% extends "shop/base.html" %}
+{% block title %}我的订单{% endblock %}
+
+{% block content %}
+  <h1>我的订单</h1>
+
+  {% if orders %}
+    <div class="accordion" id="ordersAccordion">
+      {% for order in orders %}
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="heading{{ order.id }}">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ order.id }}" aria-expanded="false" aria-controls="collapse{{ order.id }}">
+              <div class="d-flex w-100 justify-content-between">
+                <span>订单 #{{ order.id }} - {{ order.shop.name }}</span>
+                <span class="me-3">¥{{ order.total|floatformat:2 }}</span>
+                <span class="badge bg-{% if order.status == 'PAID' %}success{% elif order.status == 'PENDING' %}warning{% else %}secondary{% endif %} me-3">{{ order.get_status_display }}</span>
+                <small>{{ order.created_at|date:"Y-m-d H:i" }}</small>
+              </div>
+            </button>
+          </h2>
+          <div id="collapse{{ order.id }}" class="accordion-collapse collapse" aria-labelledby="heading{{ order.id }}" data-bs-parent="#ordersAccordion">
+            <div class="accordion-body">
+              <ul class="list-group list-group-flush">
+                {% for item in order.items.all %}
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                      {% if item.product.image %}
+                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover; margin-right: 10px;">
+                      {% endif %}
+                      {{ item.product.name }}
+                    </span>
+                    <span>x {{ item.quantity }}</span>
+                  </li>
+                {% endfor %}
+              </ul>
+              <div class="text-end mt-2">
+                <a href="{% url 'shop:order_detail' order.id %}" class="btn btn-primary btn-sm">查看详情</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card text-center p-5">
+        <p class="mb-3">你还没有订单。</p>
+        <a href="{% url 'shop:product_list' %}" class="btn btn-primary">去逛逛</a>
+    </div>
+  {% endif %}
+{% endblock %}

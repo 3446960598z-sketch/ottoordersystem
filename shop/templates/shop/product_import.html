@@ -1,0 +1,40 @@
+{% extends "shop/base.html" %}
+
+{% block title %}导入商品{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h2>从CSV文件导入商品</h2>
+                </div>
+                <div class="card-body">
+                    <p>请上传一个CSV文件以批量导入或更新商品信息。系统将使用 <strong>sku</strong> 作为唯一标识来判断是创建新商品还是更新已有商品。</p>
+                    <p>文件必须包含以下列：</p>
+                    <ul>
+                        <li><strong>sku</strong> (必需, 唯一): 商品的库存单位码。如果该SKU已存在，则更新对应商品。</li>
+                        <li><strong>name</strong> (必需): 商品名称。</li>
+                        <li><strong>price</strong> (必需): 商品价格 (例如: 25.50)。</li>
+                        <li><strong>description</strong> (可选): 商品描述。</li>
+                        <li><strong>category</strong> (可选): 商品所属分类的名称。如果分类不存在，系统将自动创建。</li>
+                        <li><strong>stock</strong> (可选, 默认 0): 库存数量。</li>
+                        <li><strong>is_active</strong> (可选, 默认 true): 商品是否上架 (true/false)。</li>
+                    </ul>
+                    <hr>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="csv_file" class="form-label">选择CSV文件</label>
+                            <input class="form-control" type="file" id="csv_file" name="csv_file" accept=".csv" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">上传并导入</button>
+                        <a href="{% url 'shop:product_list' %}" class="btn btn-secondary">取消</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

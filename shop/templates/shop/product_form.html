@@ -1,0 +1,23 @@
+{% extends "shop/base.html" %}
+{% block title %}{{ action }}商品{% endblock %}
+
+{% block content %}
+  <h1>{{ action }}商品</h1>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="mb-3">
+        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}
+          <div class="form-text">{{ field.help_text }}</div>
+        {% endif %}
+        {% for error in field.errors %}
+          <div class="invalid-feedback d-block">{{ error }}</div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+    <button class="btn btn-primary" type="submit">保存</button>
+    <a class="btn btn-secondary" href="{% if form.instance.pk %}{% url 'shop:product_detail' form.instance.pk %}{% else %}{% url 'shop:product_list' %}{% endif %}">取消</a>
+  </form>
+{% endblock %}

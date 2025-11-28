@@ -1,0 +1,57 @@
+{% extends "shop/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}我的资料 - {{ block.super }}{% endblock %}
+
+{% block page_header %}
+<div class="mb-3">
+    <a href="javascript:history.back()" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> 返回
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">我的个人资料</h1>
+
+    <div class="row">
+        <!-- Profile Update Card -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">更新个人信息</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ user_form|crispy }}
+                        <button type="submit" name="update_profile" class="btn btn-primary mt-3">保存更改</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Password Change Card -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">更改密码</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ password_form|crispy }}
+                        <button type="submit" name="change_password" class="btn btn-danger mt-3">确认更改密码</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="{% url 'shop:order_list' %}" class="btn btn-outline-secondary">查看我的订单</a>
+        <a href="{% url 'shop:address_list' %}" class="btn btn-outline-secondary">管理我的地址</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "shop/base.html" %}
+{% load static %}
+
+{% block title %}我的通知 - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">我的通知</h1>
+
+    <div class="list-group">
+        {% for notification in notifications %}
+            <a href="{% url 'shop:mark_notification_as_read' notification.id %}" 
+               class="list-group-item list-group-item-action {% if not notification.is_read %}list-group-item-primary fw-bold{% endif %}">
+                <div class="d-flex w-100 justify-content-between">
+                    <p class="mb-1">{{ notification.message }}</p>
+                    <small>{{ notification.created_at|timesince }}前</small>
+                </div>
+                {% if not notification.is_read %}
+                    <span class="badge bg-danger rounded-pill">新</span>
+                {% endif %}
+            </a>
+        {% empty %}
+            <div class="text-center py-5">
+                <i class="bi bi-bell-slash" style="font-size: 4rem; color: #ccc;"></i>
+                <p class="lead mt-3">您当前没有收到任何通知。</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "shop/base.html" %}
+{% block title %}{{ action }}商品分类{% endblock %}
+
+{% block content %}
+  <h1>{{ action }}商品分类</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">保存</button>
+    <a href="{% url 'shop:category_list' %}" class="btn btn-secondary">取消</a>
+  </form>
+{% endblock %}

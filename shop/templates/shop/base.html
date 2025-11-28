@@ -1,0 +1,329 @@
+{% load static %}
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}点餐系统{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{% static 'shop/css/style.css' %}">
+    {% block extra_head %}{% endblock %}
+    <style>
+        #chatbot-container { position: fixed; bottom: 80px; right: 20px; width: 350px; max-width: 90%; z-index: 1050; display: none; }
+        #chatbot-toggle-button { position: fixed; bottom: 20px; right: 20px; z-index: 1051; }
+        .toast-container { z-index: 1060; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light mb-3 sticky-top">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'shop:shop_list' %}">点餐系统</a>
+        <form class="d-flex mx-auto" action="{% url 'shop:search' %}" method="get">
+            <input class="form-control me-2" type="search" name="q" placeholder="搜索店铺或商品..." aria-label="Search">
+            <button class="btn btn-outline-success" type="submit">搜索</button>
+        </form>
+        <div class="d-flex gap-3 align-items-center">
+            <a id="cart-link" class="btn btn-outline-primary btn-sm position-relative" href="{% url 'shop:cart_detail' %}">
+                <i class="bi bi-cart-fill"></i> 购物车
+                <span id="cart-total-items" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none;">0</span>
+            </a>
+            
+            {% if user.is_authenticated %}
+            <a href="{% url 'shop:notification_list' %}" class="btn btn-outline-secondary btn-sm position-relative">
+                <i class="bi bi-bell-fill"></i>
+                {% if unread_notifications_count > 0 %}
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    {{ unread_notifications_count }}
+                    <span class="visually-hidden">unread messages</span>
+                </span>
+                {% endif %}
+            </a>
+
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    欢迎, {{ user.username }}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                    <li><a class="dropdown-item" href="{% url 'shop:order_list' %}">我的订单</a></li>
+                    <li><a class="dropdown-item" href="{% url 'shop:address_list' %}">我的地址</a></li>
+                    <li><a class="dropdown-item" href="{% url 'shop:ticket_list' %}">我的客服工单</a></li>
+                    <li><a class="dropdown-item" href="{% url 'shop:profile' %}">个人资料</a></li>
+                    <li><a class="dropdown-item" href="{% url 'shop:favorite_list' %}">我的收藏</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    {% if user.shop_account %}
+                    <li><a class="dropdown-item" href="{% url 'shop:merchant_dashboard' %}">商家仪表盘</a></li>
+                    {% endif %}
+                    {% if user.rider_profile %}
+                    <li><a class="dropdown-item" href="{% url 'shop:rider_order_list' %}">外卖员中心</a></li>
+                    <li><a class="dropdown-item" href="{% url 'shop:rider_income_dashboard' %}">收入仪表盘</a></li>
+                    {% endif %}
+                    {% if user.is_superuser %}
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{% url 'shop:user_batch_create' %}">批量创建用户</a></li>
+                    <li><a class="dropdown-item" href="{% url 'shop:order_import' %}">批量导入订单</a></li>
+                    <li><a class="dropdown-item" href="{% url 'shop:review_import' %}">批量导入评价</a></li>
+                    {% endif %}
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form method="post" action="{% url 'logout' %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="dropdown-item">退出</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+            {% else %}
+            <a class="btn btn-outline-primary btn-sm" href="{% url 'login' %}?next={{ request.path }}">登录</a>
+            <a class="btn btn-outline-secondary btn-sm" href="{% url 'shop:register' %}">注册</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% url 'shop:shop_list' as shop_list_url %}
+    {% if request.path != shop_list_url %}
+        <div class="mb-3">
+            <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> 返回
+            </a>
+        </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+</div>
+
+<!-- Toast container for notifications -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      <strong class="me-auto" id="toast-title">通知</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body" id="toast-body">
+    </div>
+  </div>
+</div>
+
+<!-- Chatbot UI -->
+<button class="btn btn-primary btn-lg rounded-circle" id="chatbot-toggle-button"><i class="bi bi-robot"></i></button>
+<div id="chatbot-container">
+    <div class="card" id="chat-card">
+        <div class="card-header d-flex justify-content-between align-items-center p-3">
+            <h5 class="mb-0">AI智能助手 - 数问</h5>
+            <button type="button" class="btn-close" id="chatbot-close-button"></button>
+        </div>
+        <div class="card-body" id="chat-log" style="height: 400px; overflow-y: auto;">
+            <div class="d-flex flex-row justify-content-start mb-4">
+                <div class="p-3 ms-3" style="border-radius: 15px; background-color: rgba(57, 192, 237,.2);">
+                    <p class="small mb-0">您好！我是“数问”，可以回答关于店铺、商品或订单的问题。例如：“最贵的3个商品是什么？”</p>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-muted d-flex justify-content-start align-items-center p-3">
+            <input type="text" class="form-control" id="chat-message-input" placeholder="输入您的问题...">
+            <button class="btn btn-primary ms-3" id="chat-message-submit">发送</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 全局返回刷新逻辑
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
+
+    const csrfToken = '{{ csrf_token }}';
+    const userIsAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
+    const toastLiveExample = document.getElementById('liveToast');
+    if (toastLiveExample) {
+        const toast = new bootstrap.Toast(toastLiveExample);
+        window.showToast = (title, body, success = true) => {
+            document.getElementById('toast-title').textContent = title;
+            document.getElementById('toast-body').textContent = body;
+            toastLiveExample.classList.remove('text-bg-danger', 'text-bg-success');
+            toastLiveExample.classList.add(success ? 'text-bg-success' : 'text-bg-danger');
+            toast.show();
+        };
+    }
+
+    function updateCartBadge(totalItems) {
+        const cartBadge = document.getElementById('cart-total-items');
+        if (!cartBadge) return;
+        cartBadge.textContent = totalItems;
+        cartBadge.style.display = totalItems > 0 ? 'inline-block' : 'none';
+    }
+
+    async function updateCartState() {
+        try {
+            const response = await fetch("{% url 'shop:cart_state_api' %}");
+            const data = await response.json();
+            updateCartBadge(data.total_items);
+        } catch (e) {
+            console.error("Could not update cart state:", e);
+        }
+    }
+
+    if(userIsAuthenticated) {
+        updateCartState();
+    }
+
+    document.body.addEventListener('submit', async function(e) {
+        if (e.target && e.target.matches('.add-to-cart-form')) {
+            e.preventDefault();
+            const form = e.target;
+            const productId = form.querySelector('button[type="submit"]').value;
+            
+            try {
+                const response = await fetch("{% url 'shop:add_to_cart_api' %}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                    body: JSON.stringify({ product_id: productId })
+                });
+                const data = await response.json();
+                if (window.showToast) {
+                    window.showToast(data.success ? '成功' : '失败', data.message, data.success);
+                }
+                if (data.success) {
+                    updateCartBadge(data.cart.total_items);
+                }
+            } catch (err) {
+                console.error("Add to cart failed:", err);
+                if(window.showToast) window.showToast('错误', '添加到购物车失败', false);
+            }
+        }
+    });
+
+    // Chatbot logic
+    const chatbotContainer = document.getElementById('chatbot-container');
+    const toggleButton = document.getElementById('chatbot-toggle-button');
+    const closeButton = document.getElementById('chatbot-close-button');
+    const chatLog = document.getElementById('chat-log');
+    const messageInput = document.getElementById('chat-message-input');
+    const submitButton = document.getElementById('chat-message-submit');
+
+    if (toggleButton) {
+        toggleButton.addEventListener('click', () => {
+            if(chatbotContainer) chatbotContainer.style.display = 'block';
+            toggleButton.style.display = 'none';
+        });
+    }
+    if (closeButton) {
+        closeButton.addEventListener('click', () => {
+            if(chatbotContainer) chatbotContainer.style.display = 'none';
+            if(toggleButton) toggleButton.style.display = 'block';
+        });
+    }
+    
+    if (submitButton && messageInput && chatLog) {
+        const appendMessage = (message, sender) => {
+            const messageWrapper = document.createElement('div');
+            messageWrapper.classList.add('d-flex', 'flex-row', 'mb-4');
+            
+            const messageBubble = document.createElement('div');
+            messageBubble.classList.add('p-3');
+            
+            const p = document.createElement('p');
+            p.classList.add('small', 'mb-0');
+            
+            if (sender === 'ai-login-prompt') {
+                const loginLink = `<a href="{% url 'login' %}?next=${window.location.pathname}">登录</a>`;
+                p.innerHTML = `${message} 请${loginLink}后继续。`;
+            } else {
+                p.textContent = message;
+            }
+            
+            if (sender === 'user') {
+                messageWrapper.classList.add('justify-content-end');
+                messageBubble.classList.add('me-3', 'border');
+                messageBubble.style.cssText = 'border-radius: 15px; background-color: #fbfbfb;';
+            } else {
+                messageWrapper.classList.add('justify-content-start');
+                messageBubble.classList.add('ms-3');
+                messageBubble.style.cssText = 'border-radius: 15px; background-color: rgba(57, 192, 237,.2);';
+            }
+            
+            messageBubble.appendChild(p);
+            messageWrapper.appendChild(messageBubble);
+            chatLog.appendChild(messageWrapper);
+            chatLog.scrollTop = chatLog.scrollHeight;
+            
+            return p;
+        };
+
+        const setLoading = (isLoading) => {
+            submitButton.disabled = isLoading;
+            messageInput.disabled = isLoading;
+            if (isLoading) {
+                submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+            } else {
+                submitButton.innerHTML = '发送';
+            }
+        };
+
+        const sendMessage = async () => {
+            const question = messageInput.value.trim();
+            if (question === '' || submitButton.disabled) return;
+
+            if (!userIsAuthenticated) {
+                appendMessage('抱歉，您需要登录才能使用AI助手。', 'ai-login-prompt');
+                messageInput.value = '';
+                return;
+            }
+
+            appendMessage(question, 'user');
+            messageInput.value = '';
+            setLoading(true);
+
+            const thinkingParagraph = appendMessage('AI正在思考中...', 'ai');
+
+            try {
+                const response = await fetch("{% url 'shop:chatbot_api' %}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                    body: JSON.stringify({ question: question })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || data.error) {
+                    thinkingParagraph.textContent = data.error || `服务器返回错误: ${response.status}`;
+                } else {
+                    thinkingParagraph.textContent = data.response;
+                }
+
+            } catch (error) {
+                thinkingParagraph.textContent = '抱歉，连接AI助手时发生错误。';
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        submitButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', e => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    }
+});
+</script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

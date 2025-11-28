@@ -1,0 +1,28 @@
+{% extends "shop/base.html" %}
+{% block title %}商品分类管理{% endblock %}
+
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>商品分类管理</h1>
+    <a href="{% url 'shop:category_create' %}" class="btn btn-primary">创建新分类</a>
+  </div>
+
+  <div class="list-group">
+    {% for category in categories %}
+      <div class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <h5 class="mb-1">{{ category.name }}</h5>
+          <p class="mb-1 text-muted">{{ category.description|default:"暂无描述" }}</p>
+        </div>
+        <div>
+          <a href="{% url 'shop:category_edit' category.pk %}" class="btn btn-sm btn-secondary">编辑</a>
+          <a href="{% url 'shop:category_delete' category.pk %}" class="btn btn-sm btn-danger">删除</a>
+        </div>
+      </div>
+    {% empty %}
+      <div class="card text-center p-4">
+        <p>您还没有创建任何商品分类。</p>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}

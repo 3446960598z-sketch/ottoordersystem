@@ -1,0 +1,40 @@
+{% extends "shop/base.html" %}
+{% block title %}销售报表{% endblock %}
+
+{% block content %}
+  <h1 class="mb-4">销售报表</h1>
+
+  <div class="btn-group mb-4" role="group">
+    <a href="?period=today" class="btn {% if period == 'today' %}btn-primary{% else %}btn-outline-primary{% endif %}">今日</a>
+    <a href="?period=week" class="btn {% if period == 'week' %}btn-primary{% else %}btn-outline-primary{% endif %}">本周</a>
+    <a href="?period=month" class="btn {% if period == 'month' %}btn-primary{% else %}btn-outline-primary{% endif %}">本月</a>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card bg-light mb-3">
+        <div class="card-header">总销售额</div>
+        <div class="card-body">
+          <h4 class="card-title">¥{{ total_sales|floatformat:2 }}</h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card bg-light mb-3">
+        <div class="card-header">总订单数</div>
+        <div class="card-body">
+          <h4 class="card-title">{{ total_orders }}</h4>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h4>订单明细</h4>
+  <ul class="list-group">
+    {% for order in orders %}
+      <li class="list-group-item">订单 #{{ order.id }} - ¥{{ order.total|floatformat:2 }} ({{ order.paid_at|date:"Y-m-d H:i" }})</li>
+    {% empty %}
+      <li class="list-group-item">此期间内无订单。</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% for product in products %}
+  {% if product.is_active %}
+    <div class="text-center" style="width: 80px;">
+      {% if product.image %}
+        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid rounded mb-1">
+      {% else %}
+        <div class="bg-secondary rounded mb-1" style="width: 80px; height: 80px;"></div>
+      {% endif %}
+      <small class="d-block text-truncate" title="{{ product.name }}">{{ product.name }}</small>
+    </div>
+  {% endif %}
+{% empty %}
+  <p>暂无商品</p>
+{% endfor %}

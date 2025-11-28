@@ -1,0 +1,40 @@
+{% extends "shop/base.html" %}
+{% block title %}搜索结果: {{ query }}{% endblock %}
+
+{% block content %}
+  <h1 class="mb-4">搜索结果: "{{ query }}"</h1>
+
+  <h2>店铺</h2>
+  {% if shops %}
+    <div class="list-group mb-4">
+      {% for shop in shops %}
+        <a href="{% url 'shop:shop_detail' shop.pk %}" class="list-group-item list-group-item-action">{{ shop.name }}</a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>没有找到相关店铺。</p>
+  {% endif %}
+
+  <h2>商品</h2>
+  {% if products %}
+    <div class="row">
+      {% for product in products %}
+        <div class="col-md-4 mb-4">
+          <div class="card h-100">
+            <a href="{% url 'shop:product_detail' product.pk %}">
+              {% if product.image %}
+                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+              {% endif %}
+            </a>
+            <div class="card-body">
+              <h5 class="card-title"><a href="{% url 'shop:product_detail' product.pk %}">{{ product.name }}</a></h5>
+              <p class="card-text">价格：¥{{ product.price }}</p>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>没有找到相关商品。</p>
+  {% endif %}
+{% endblock %}

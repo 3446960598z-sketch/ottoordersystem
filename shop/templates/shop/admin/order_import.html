@@ -1,0 +1,51 @@
+{% extends "shop/base.html" %}
+
+{% block title %}批量导入订单{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h2>批量导入订单</h2>
+                </div>
+                <div class="card-body">
+                    <p>此功能仅限超级管理员使用，用于通过上传CSV文件批量导入订单及其商品条目。</p>
+                    <p>CSV文件必须包含以下列：</p>
+                    <ul>
+                        <li><strong>user_username</strong> (必需): 下单用户的用户名。</li>
+                        <li><strong>shop_name</strong> (必需): 订单所属的店铺名称。</li>
+                        <li><strong>contact_name</strong> (必需): 收货人姓名。</li>
+                        <li><strong>contact_phone</strong> (必需): 收货人电话。</li>
+                        <li><strong>address_line_1</strong> (必需): 详细收货地址。</li>
+                        <li><strong>city</strong> (必需): 城市。</li>
+                        <li><strong>postal_code</strong> (必需): 邮政编码。</li>
+                        <li><strong>items</strong> (必需): 包含订单商品的JSON字符串。例如: <code>[{"sku": "SKU001", "quantity": 2}, {"sku": "SKU002", "quantity": 1}]</code></li>
+                        <li><strong>status</strong> (可选, 默认 'DELIVERED'): 订单状态 (例如: 'PAID', 'DELIVERED')。</li>
+                        <li><strong>delivery_fee</strong> (可选, 默认 1.00): 配送费。</li>
+                        <li><strong>created_at</strong> (可选): 订单创建时间 (格式: YYYY-MM-DD HH:MM:SS)。如果留空，则使用当前时间。</li>
+                        <li><strong>paid_at</strong> (可选): 支付时间 (格式: YYYY-MM-DD HH:MM:SS)。如果留空，则使用当前时间。</li>
+                    </ul>
+                    <div class="alert alert-info" role="alert">
+                        <strong>地址处理:</strong> 系统会根据地址信息为用户查找或创建一个新的收货地址。
+                    </div>
+                    <div class="alert alert-warning" role="alert">
+                        <strong>注意:</strong> 整个上传过程将在一个事务中完成。如果文件中任何一行数据有误（例如，用户、店铺或商品不存在），所有订单的导入都将被取消。
+                    </div>
+                    <hr>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="csv_file" class="form-label">选择CSV文件</label>
+                            <input class="form-control" type="file" id="csv_file" name="csv_file" accept=".csv" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">上传并导入订单</button>
+                        <a href="{% url 'shop:shop_list' %}" class="btn btn-secondary">返回首页</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

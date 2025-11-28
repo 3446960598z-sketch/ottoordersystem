@@ -1,0 +1,81 @@
+{% extends "shop/base.html" %}
+{% block title %}订单详情{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h1>订单 #{{ order.id }}</h1>
+      <span class="badge bg-{% if order.status == 'PAID' %}success{% elif order.status == 'PENDING' %}warning{% elif order.status == 'DELIVERING' %}info{% elif order.status == 'DELIVERED' %}primary{% else %}secondary{% endif %}">{{ order.get_status_display }}</span>
+    </div>
+    <div class="card-body">
+      <h5 class="card-title">商品列表</h5>
+      <ul class="list-group list-group-flush mb-4">
+        {% for item in order.items.all %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              {% if item.product.image %}
+                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover; margin-right: 15px;">
+              {% endif %}
+              <a href="{{ item.product.get_absolute_url }}">{{ item.product.name }}</a>
+            </div>
+            <span>{{ item.quantity }} x ¥{{ item.product.price|floatformat:2 }}</span>
+            <span class="fw-bold">¥{{ item.subtotal|floatformat:2 }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+
+      <div class="row">
+        <div class="col-md-6">
+          <h5 class="card-title">订单信息</h5>
+          <p><strong>店铺:</strong> <a href="{{ order.shop.get_absolute_url }}">{{ order.shop.name }}</a></p>
+          <p><strong>收货地址:</strong> {{ order.shipping_address.contact_name }}, {{ order.shipping_address.contact_phone }}</p>
+          <p>{{ order.shipping_address.city }} {{ order.shipping_address.address_line_1 }}</p>
+          <p><strong>下单时间:</strong> {{ order.created_at|date:"Y-m-d H:i" }}</p>
+          {% if order.paid_at %}<p><strong>支付时间:</strong> {{ order.paid_at|date:"Y-m-d H:i" }}</p>{% endif %}
+          {% if order.delivered_at %}<p><strong>送达时间:</strong> {{ order.delivered_at|date:"Y-m-d H:i" }}</p>{% endif %}
+        </div>
+        <div class="col-md-6 text-end">
+          <h5 class="card-title">账单总结</h5>
+          <p>商品总价: ¥{{ order.subtotal|floatformat:2 }}</p>
+          {% if order.coupon %}
+            <p class="text-success">优惠券 ({{ order.coupon.code }}): - ¥{{ order.discount|floatformat:2 }}</p>
+          {% endif %}
+          <p>配送费: ¥{{ order.delivery_fee|floatformat:2 }}</p>
+          <hr>
+          <h4 class="fw-bold">订单总额: ¥{{ order.total|floatformat:2 }}</h4>
+        </div>
+      </div>
+    </div>
+    <div class="card-footer text-end">
+      {% if request.user == order.user %}
+        {% if order.status == 'PENDING' %}
+          <form method="post" action="{% url 'shop:order_pay' order.pk %}" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success">去支付</button>
+          </form>
+        {% elif order.status == 'DELIVERED' and not order.review %}
+          <a href="{% url 'shop:add_review' order.pk %}" class="btn btn-primary">评价订单</a>
+        {% endif %}
+      {% elif request.user.rider_profile and request.user.rider_profile == order.rider %}
+        <form method="post" action="{% url 'shop:rider_update_order_status' order.pk %}" class="d-inline">
+          {% csrf_token %}
+          {% if order.status == 'PAID' %}
+            <button type="submit" name="status" value="READY_FOR_PICKUP" class="btn btn-info">确认备货</button>
+          {% elif order.status == 'DELIVERING' %}
+            <button type="submit" name="status" value="DELIVERED" class="btn btn-success">确认送达</button>
+          {% endif %}
+        </form>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if order.review %}
+    <div class="card mt-4">
+        <div class="card-header">订单评价</div>
+        <div class="card-body">
+            <p>评分: <span class="text-warning">{{ order.review.rating }}/5</span></p>
+            <p>{{ order.review.comment|default:"用户没有留下文字评价。" }}</p>
+        </div>
+    </div>
+  {% endif %}
+{% endblock %}

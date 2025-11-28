@@ -1,0 +1,88 @@
+{% extends "shop/base.html" %}
+{% load static %}
+{% load shop_extras %}
+{% block title %}首页 - 发现附近的美味{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'shop/css/shop_list.css' %}">
+{% endblock %}
+
+{% block content %}
+{% if banners %}
+<div class="card shadow-lg mb-5 border-0 rounded-4 overflow-hidden">
+  <div id="bannerCarousel" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+      {% for banner in banners %}
+      <button type="button" data-bs-target="#bannerCarousel" data-bs-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}" aria-current="true" aria-label="Slide {{ forloop.counter }}"></button>
+      {% endfor %}
+    </div>
+    <div class="carousel-inner">
+      {% for banner in banners %}
+      <div class="carousel-item {% if forloop.first %}active{% endif %}">
+        <a href="{{ banner.get_link_url }}">
+          <img src="{{ banner.image.url }}" class="d-block w-100 carousel-banner-img" alt="{{ banner.title }}">
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#bannerCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#bannerCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+  </div>
+</div>
+{% endif %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="fw-bold section-title">附近的店铺</h1>
+  <a href="#" class="text-decoration-none text-muted">查看全部 &rarr;</a>
+</div>
+
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+  {% for shop in shops %}
+  <div class="col">
+    <div class="card h-100 shadow-sm border-light-subtle rounded-4 overflow-hidden shop-card">
+      {% if shop|is_new_shop %}
+        <div class="new-shop-badge">新店开张</div>
+      {% endif %}
+      <a href="{% url 'shop:shop_detail' shop.pk %}" class="text-decoration-none text-dark">
+        <img src="{% if shop.image %}{{ shop.image.url }}{% else %}{% static 'shop/images/default_shop.png' %}{% endif %}" class="card-img-top shop-card-img" alt="{{ shop.name }}">
+        <div class="card-body">
+          <h5 class="card-title fw-bold">{{ shop.name }}</h5>
+          <div class="d-flex align-items-center mb-2">
+            <span class="badge bg-warning text-dark me-2">
+              <i class="bi bi-star-fill"></i> {{ shop.rating_avg|floatformat:1 }}
+            </span>
+            <span class="text-muted small">({{ shop.rating_count }} 人评价)</span>
+          </div>
+          <p class="card-text text-muted small">{{ shop.description|default:"店主很懒，什么都没留下..."|truncatechars:50 }}</p>
+        </div>
+      </a>
+      
+      <!-- Product Thumbnails -->
+      <div class="product-thumbnail-container">
+        {% for product in shop.recent_products %}
+          {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-thumbnail" title="{{ product.name }}">
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <div class="card-footer bg-white border-0 pt-3 pb-3 px-3 mt-auto">
+        <a href="{% url 'shop:shop_detail' shop.pk %}" class="btn btn-gradient w-100 fw-semibold">进店点餐</a>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12">
+    <div class="card text-center p-5 rounded-4">
+      <p class="text-muted">附近暂无店铺开张，敬请期待！</p>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

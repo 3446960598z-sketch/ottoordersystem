@@ -1,0 +1,125 @@
+{% extends "shop/base.html" %}
+{% block title %}购物车{% endblock %}
+
+{% block content %}
+<div id="cart-content">
+  <h1>购物车</h1>
+  {% if cart %}
+    <div class="card">
+      <div class="card-body">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>商品</th>
+              <th>店铺</th>
+              <th class="text-end">单价</th>
+              <th class="text-center">数量</th>
+              <th class="text-end">小计</th>
+              <th class="text-center">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for key, item in cart.items %}
+              <tr data-item-id="{{ key }}">
+                <td>{{ item.name }}</td>
+                <td>{{ item.shop_name }}</td>
+                <td class="text-end">¥{{ item.price|floatformat:2 }}</td>
+                <td class="text-center">
+                  <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="form-control form-control-sm quantity-input" style="width: 80px;" data-item-id="{{ key }}">
+                </td>
+                <td class="text-end item-subtotal">¥{{ item.subtotal|floatformat:2 }}</td>
+                <td class="text-center">
+                  <button class="btn btn-sm btn-outline-danger remove-item-btn" data-item-id="{{ key }}">移除</button>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="card-footer">
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <form id="coupon-form" class="d-flex">
+              <input type="text" name="coupon_code" id="coupon-code-input" class="form-control" placeholder="输入优惠码">
+              <button type="submit" class="btn btn-primary ms-2">应用</button>
+            </form>
+            <div id="coupon-message" class="mt-2"></div>
+          </div>
+          <div class="col-md-6 text-end">
+            <h5>商品总价: <span id="total-price">¥{{ total_price|floatformat:2 }}</span></h5>
+            <div id="discount-section" class="{% if not coupon %}d-none{% endif %}">
+              <h6 class="text-success">已应用优惠券 "<span id="coupon-code-display">{{ coupon.code }}</span>": - ¥<span id="discount-amount">{{ discount|floatformat:2 }}</span></h6>
+            </div>
+            <h4>最终总价: <span id="final-price" class="text-danger">¥{{ final_price|floatformat:2 }}</span></h4>
+            <div class="mt-3">
+              <a href="{% url 'shop:select_address' %}" class="btn btn-success">去结算</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="card text-center p-5">
+      <p class="mb-3">购物车为空。</p>
+      <a href="{% url 'shop:product_list' %}" class="btn btn-primary">去逛逛</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const csrfToken = '{{ csrf_token }}';
+
+    async function handleCartUpdate(url, body) {
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify(body)
+            });
+            const data = await response.json();
+            if (data.success) {
+                // Instead of full page reload, just re-render the cart section
+                // For simplicity in this step, we will reload. A more advanced implementation
+                // would dynamically update the DOM based on the returned JSON.
+                location.reload(); 
+            } else {
+                const couponMessage = document.getElementById('coupon-message');
+                if(couponMessage) {
+                    couponMessage.textContent = data.message;
+                    couponMessage.className = 'mt-2 text-danger';
+                }
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('change', function() {
+            const itemId = this.dataset.itemId;
+            const quantity = this.value;
+            handleCartUpdate("{% url 'shop:update_cart_item_api' %}", { item_id: itemId, quantity: quantity });
+        });
+    });
+
+    document.querySelectorAll('.remove-item-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const itemId = this.dataset.itemId;
+            handleCartUpdate("{% url 'shop:remove_cart_item_api' %}", { item_id: itemId });
+        });
+    });
+
+    const couponForm = document.getElementById('coupon-form');
+    if (couponForm) {
+        couponForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const couponCode = document.getElementById('coupon-code-input').value;
+            handleCartUpdate("{% url 'shop:apply_coupon_api' %}", { coupon_code: couponCode });
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "shop/base.html" %}
+{% block title %}外卖员中心{% endblock %}
+
+{% block content %}
+  <h1>外卖员中心</h1>
+
+  <div class="row">
+    <div class="col-md-6">
+      <h2>我的配送任务 ({{ my_orders.count }}/10)</h2>
+      {% if my_orders %}
+        <div class="list-group">
+          {% for order in my_orders %}
+            <a href="{% url 'shop:order_detail' order.id %}" class="list-group-item list-group-item-action">
+              <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">订单 #{{ order.id }}</h5>
+                <small>接单于: {{ order.accepted_at|date:"H:i" }}</small>
+              </div>
+              <p class="mb-1">从: {{ order.shop.name }}</p>
+              <p class="mb-1">送至: {{ order.user.username }}</p>
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="card text-center p-4">
+          <p>没有正在配送的订单。</p>
+        </div>
+      {% endif %}
+    </div>
+    <div class="col-md-6">
+      <h2>可接新订单</h2>
+      {% if available_orders %}
+        <div class="list-group">
+          {% for order in available_orders %}
+            <div class="list-group-item">
+              <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">订单 #{{ order.id }}</h5>
+                <small>支付于: {{ order.paid_at|date:"H:i" }}</small>
+              </div>
+              <p class="mb-1">从: {{ order.shop.name }}</p>
+              <div class="d-flex justify-content-end">
+                <form method="post" action="{% url 'shop:rider_accept_order' order.pk %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-success">接单</button>
+                </form>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="card text-center p-4">
+          <p>暂无可接的新订单。</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

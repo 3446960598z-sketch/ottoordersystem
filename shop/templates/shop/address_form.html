@@ -1,0 +1,12 @@
+{% extends "shop/base.html" %}
+{% block title %}{{ action }}地址{% endblock %}
+
+{% block content %}
+  <h1>{{ action }}地址</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">保存</button>
+    <a href="{% url 'shop:address_list' %}" class="btn btn-secondary">取消</a>
+  </form>
+{% endblock %}

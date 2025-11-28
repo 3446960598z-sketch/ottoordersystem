@@ -1,0 +1,21 @@
+{% extends "shop/base.html" %}
+{% block title %}客服收件箱{% endblock %}
+
+{% block content %}
+  <h1>客服收件箱</h1>
+  <p>这里是所有待处理和处理中的用户工单。</p>
+
+  <div class="list-group">
+    {% for ticket in tickets %}
+      <a href="{% url 'shop:ticket_detail' ticket.pk %}" class="list-group-item list-group-item-action">
+        <div class="d-flex w-100 justify-content-between">
+          <h5 class="mb-1">#{{ ticket.id }} - {{ ticket.subject }}</h5>
+          <small>来自: {{ ticket.user.username }}</small>
+        </div>
+        <p class="mb-1">状态: <span class="badge bg-{% if ticket.status == 'OPEN' %}success{% elif ticket.status == 'IN_PROGRESS' %}info{% else %}secondary{% endif %}">{{ ticket.get_status_display }}</span></p>
+      </a>
+    {% empty %}
+      <p>太棒了！没有需要处理的工单。</p>
+    {% endfor %}
+  </div>
+{% endblock %}

@@ -1,0 +1,145 @@
+{% extends "shop/base.html" %}
+{% block title %}AI智能助手 - 数问{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row d-flex justify-content-center">
+        <div class="col-md-8 col-lg-6 col-xl-8">
+            <div class="card" id="chat-card">
+                <div class="card-header d-flex justify-content-between align-items-center p-3">
+                    <h5 class="mb-0">AI智能助手 - 数问</h5>
+                </div>
+                <div class="card-body" id="chat-log" style="height: 400px; overflow-y: auto;">
+                    <!-- 欢迎消息 -->
+                    <div class="d-flex flex-row justify-content-start mb-4">
+                        <div class="p-3 ms-3" style="border-radius: 15px; background-color: rgba(57, 192, 237,.2);">
+                            <p class="small mb-0">您好！我是您的智能数据库助手“数问”。您可以问我关于店铺、商品或订单的问题。例如：“最贵的3个商品是什么？”</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-muted d-flex justify-content-start align-items-center p-3">
+                    <input type="text" class="form-control" id="chat-message-input" placeholder="输入您的问题...">
+                    <button class="btn btn-primary ms-3" id="chat-message-submit">发送</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatLog = document.getElementById('chat-log');
+    const messageInput = document.getElementById('chat-message-input');
+    const submitButton = document.getElementById('chat-message-submit');
+
+    function appendUserMessage(message) {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('d-flex', 'flex-row', 'justify-content-end', 'mb-4');
+        messageDiv.innerHTML = `
+            <div class="p-3 me-3 border" style="border-radius: 15px; background-color: #fbfbfb;">
+                <p class="small mb-0">${message}</p>
+            </div>
+        `;
+        chatLog.appendChild(messageDiv);
+        chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    function createAiMessageElement() {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('d-flex', 'flex-row', 'justify-content-start', 'mb-4');
+        
+        const contentWrapper = document.createElement('div');
+        contentWrapper.classList.add('p-3', 'ms-3');
+        contentWrapper.style.borderRadius = '15px';
+        contentWrapper.style.backgroundColor = 'rgba(57, 192, 237,.2)';
+
+        const p = document.createElement('p');
+        p.classList.add('small', 'mb-0');
+        
+        contentWrapper.appendChild(p);
+        messageDiv.appendChild(contentWrapper);
+        chatLog.appendChild(messageDiv);
+        
+        return p;
+    }
+
+    function setLoading(isLoading) {
+        if (isLoading) {
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 正在思考...';
+        } else {
+            submitButton.disabled = false;
+            submitButton.innerHTML = '发送';
+        }
+    }
+
+    async function sendMessage() {
+        const question = messageInput.value.trim();
+        if (question === '') return;
+
+        appendUserMessage(question);
+        messageInput.value = '';
+        setLoading(true);
+
+        const aiMessageP = createAiMessageElement();
+        aiMessageP.textContent = 'AI正在思考...'; // Initial placeholder
+
+        try {
+            const response = await fetch("{% url 'shop:chatbot_api' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'text/plain',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ question: question })
+            });
+
+            console.log("Fetch response received. Status:", response.status, "OK:", response.ok);
+
+            if (!response.ok) {
+                throw new Error(`服务器返回错误: ${response.status} ${response.statusText}`);
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            let firstChunk = true;
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) {
+                    console.log("Stream finished.");
+                    break;
+                }
+
+                const chunk = decoder.decode(value, { stream: true });
+                console.log("Received chunk:", chunk); // 诊断日志：打印每个数据块
+
+                if (firstChunk) {
+                    aiMessageP.innerHTML = ''; // 收到第一个数据块时，清空“正在思考”
+                    firstChunk = false;
+                }
+                
+                aiMessageP.innerHTML += chunk.replace(/\n/g, '<br>');
+                chatLog.scrollTop = chatLog.scrollHeight;
+            }
+
+        } catch (error) {
+            // 这是最关键的部分
+            console.error("!!!!!!!!!! CATCH BLOCK TRIGGERED !!!!!!!!!!");
+            console.error("The exact error object is:", error);
+            aiMessageP.textContent = `抱歉，处理AI回复时发生错误。请打开浏览器控制台 (F12 -> Console) 查看详细错误信息。`;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    submitButton.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+});
+</script>
+{% endblock %}

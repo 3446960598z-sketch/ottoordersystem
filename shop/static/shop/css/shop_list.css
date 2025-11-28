@@ -1,0 +1,221 @@
+body {
+  position: relative;
+  overflow-x: hidden;
+  background-color: #f8f9fa; /* Light background for overall page */
+}
+
+body::before, body::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  z-index: -1;
+}
+
+body::before {
+  width: 450px;
+  height: 450px;
+  background-color: rgba(255, 165, 0, 0.15); /* Brighter Orange */
+  filter: blur(120px);
+  top: -150px;
+  left: -150px;
+}
+
+body::after {
+  width: 550px;
+  height: 550px;
+  background-color: rgba(66, 135, 245, 0.15); /* Brighter Blue */
+  filter: blur(130px);
+  bottom: -250px;
+  right: -200px;
+}
+
+/* Carousel specific styles */
+.card.shadow-lg {
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,.1)!important; /* Slightly softer initial shadow */
+}
+
+#bannerCarousel {
+    border-radius: 1rem; /* Consistent rounded corners */
+    overflow: hidden; /* Ensure content respects border-radius */
+}
+
+.carousel-banner-img {
+    max-height: 400px;
+    object-fit: cover;
+    width: 100%; /* Ensure image fills the carousel item */
+}
+
+.shop-card {
+  transition: transform .3s ease-in-out, box-shadow .3s ease-in-out, border .3s ease-in-out, background-color .3s ease-in-out; /* Added background-color transition */
+  position: relative;
+  background-color: rgba(255, 255, 255, 0.9); /* Slightly less transparent */
+  backdrop-filter: blur(15px); /* Slightly more blur */
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255, 255, 255, 0.5); /* Lighter, more subtle initial border */
+  border-radius: 1rem; /* More pronounced rounded corners */
+  overflow: hidden; /* Ensure content respects border-radius */
+}
+
+.shop-card:hover {
+  transform: translateY(-8px) scale(1.02); /* More pronounced lift */
+  box-shadow: 0 1.5rem 3rem rgba(0,0,0,.15)!important; /* Stronger shadow on hover */
+  border-image: linear-gradient(to right, #ff8c00, #ff4500) 1;
+  background-color: rgba(255, 255, 255, 0.98); /* Almost opaque on hover */
+}
+
+.shop-card .card-body {
+  flex-grow: 1;
+  padding: 1.5rem; /* More padding */
+}
+
+.shop-card .card-footer {
+  margin-top: auto;
+  padding: 1rem 1.5rem; /* More padding */
+  background-color: rgba(255, 255, 255, 0.7); /* Slightly transparent footer */
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.btn-gradient {
+  background-image: linear-gradient(to right, #ff8c00, #ff4500);
+  border: none;
+  color: white;
+  transition: background-image .3s ease-in-out, transform .1s ease-in-out, box-shadow .3s ease-in-out; /* Added box-shadow transition */
+  border-radius: 0.5rem; /* Rounded button */
+  padding: 0.75rem 1.5rem; /* More padding */
+  font-size: 1.05rem; /* Slightly larger font */
+  box-shadow: 0 4px 10px rgba(255, 69, 0, 0.2); /* Initial button shadow */
+}
+
+.btn-gradient:hover {
+  background-image: linear-gradient(to right, #ff4500, #ff8c00);
+  color: white;
+  transform: scale(1.03); /* Slightly less aggressive scale */
+  box-shadow: 0 6px 15px rgba(255, 69, 0, 0.3); /* Stronger shadow on hover */
+}
+
+.btn-gradient:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 5px rgba(255, 69, 0, 0.2); /* Smaller shadow on active */
+}
+
+.section-title {
+  border-bottom: 4px solid;
+  border-image: linear-gradient(to right, #ff8c00, #ff4500) 1;
+  padding-bottom: 0.6rem;
+  font-size: 2.2rem; /* Larger title */
+  color: #343a40; /* Darker text for contrast */
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.05); /* Subtle text shadow */
+}
+
+/* "查看全部" link styling */
+.text-muted.text-decoration-none {
+    color: #6c757d !important;
+    transition: color 0.3s ease, text-decoration 0.3s ease;
+}
+
+.text-muted.text-decoration-none:hover {
+    color: #ff4500 !important; /* Orange on hover */
+    text-decoration: underline !important;
+}
+
+
+.product-thumbnail-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.5rem 1.5rem; /* Adjusted padding */
+  overflow: hidden;
+  flex-wrap: nowrap;
+  min-height: 72px;
+  background-color: rgba(0, 0, 0, 0.03); /* Slightly darker background for empty state */
+  border-top: 1px solid rgba(0, 0, 0, 0.05); /* Separator line */
+}
+
+.product-thumbnail-container:empty::before {
+  content: "暂无热门商品";
+  font-size: 0.85rem; /* Slightly larger font */
+  color: #999;
+  padding-left: 0.5rem;
+}
+
+.product-thumbnail {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 0.6rem; /* Slightly more rounded */
+  border: 2px solid rgba(255, 255, 255, 0.8); /* Softer white border */
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15); /* Slightly stronger shadow */
+  flex-shrink: 0;
+  transition: transform .2s ease, box-shadow .2s ease; /* Added box-shadow transition */
+}
+
+.product-thumbnail:hover {
+  transform: scale(1.15); /* More pronounced scale */
+  box-shadow: 0 5px 12px rgba(0,0,0,0.25); /* Stronger shadow on hover */
+}
+
+.new-shop-badge {
+  position: absolute;
+  top: 12px; /* Adjusted position */
+  right: 12px; /* Adjusted position */
+  background: linear-gradient(to right, #ff4500, #ff8c00);
+  color: white;
+  padding: 0.4rem 0.8rem; /* More padding */
+  border-radius: 0.4rem; /* Slightly more rounded */
+  font-size: 0.85rem; /* Slightly larger font */
+  font-weight: bold;
+  z-index: 10;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.25); /* Stronger shadow */
+  animation: pulse 1.5s infinite; /* Added pulse animation */
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.shop-card-img {
+    height: 200px;
+    object-fit: cover;
+    border-top-left-radius: 1rem; /* Match card border radius */
+    border-top-right-radius: 1rem; /* Match card border radius */
+}
+
+/* Rating badge improvements */
+.badge.bg-warning {
+    background-color: #ffc107 !important; /* Ensure consistent warning color */
+    color: #343a40 !important; /* Darker text for better contrast */
+    padding: 0.4em 0.6em;
+    font-size: 0.9em;
+    border-radius: 0.3em;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.badge.bg-warning i {
+    color: #fff; /* White star icon */
+    text-shadow: 0 0 2px rgba(0,0,0,0.3);
+}
+
+/* Text styles */
+.card-title {
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
+}
+
+.card-text.text-muted.small {
+    font-size: 0.9rem;
+    line-height: 1.4;
+}

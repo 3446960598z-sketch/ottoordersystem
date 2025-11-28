@@ -1,0 +1,27 @@
+{% extends "shop/base.html" %}
+{% block title %}店铺订单 - {{ shop.name }}{% endblock %}
+
+{% block content %}
+  <h1>店铺订单 <small class="text-muted">{{ shop.name }}</small></h1>
+
+  <div class="list-group">
+    {% for order in orders %}
+      <a href="{% url 'shop:order_detail' order.id %}" class="list-group-item list-group-item-action flex-column align-items-start">
+        <div class="d-flex w-100 justify-content-between">
+          <h5 class="mb-1">订单 #{{ order.id }}</h5>
+          <small>{{ order.created_at|date:"Y-m-d H:i" }}</small>
+        </div>
+        <p class="mb-1">顾客: {{ order.user.username }}</p>
+        <p class="mb-1">总金额: ¥{{ order.total|floatformat:2 }}</p>
+        <small>状态: <span class="badge bg-{% if order.status == 'PAID' %}success{% elif order.status == 'PENDING' %}warning{% elif order.status == 'DELIVERING' %}info{% else %}secondary{% endif %}">{{ order.get_status_display }}</span></small>
+        {% if order.rider %}
+          <small class="ms-2">由 {{ order.rider.user.username }} 配送</small>
+        {% endif %}
+      </a>
+    {% empty %}
+      <div class="card text-center p-5">
+          <p>暂无订单。</p>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "shop/base.html" %}
+{% load static %}
+
+{% block title %}我的收藏夹 - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">我的收藏夹</h1>
+
+    {% if favorites %}
+        <div class="row">
+            {% for fav in favorites %}
+                <div class="col-md-4 col-lg-3 mb-4">
+                    <div class="card h-100">
+                        <a href="{{ fav.product.get_absolute_url }}">
+                            {% if fav.product.image %}
+                                <img src="{{ fav.product.image.url }}" class="card-img-top" alt="{{ fav.product.name }}">
+                            {% else %}
+                                <img src="{% static 'shop/images/default_product.png' %}" class="card-img-top" alt="No image available">
+                            {% endif %}
+                        </a>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title"><a href="{{ fav.product.get_absolute_url }}" class="text-decoration-none text-dark">{{ fav.product.name }}</a></h5>
+                            <p class="card-text text-muted">{{ fav.product.shop.name }}</p>
+                            <p class="card-text fs-5 text-danger">¥{{ fav.product.price }}</p>
+                            <div class="mt-auto d-flex justify-content-between">
+                                <!-- Add to cart form -->
+                                <form action="{% url 'shop:add_to_cart' fav.product.id %}" method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <i class="bi bi-cart-plus"></i> 添加到购物车
+                                    </button>
+                                </form>
+                                <!-- Remove from favorites form -->
+                                <form action="{% url 'shop:toggle_favorite' fav.product.id %}" method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="从收藏夹中移除">
+                                        <i class="bi bi-heartbreak-fill"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-heart" style="font-size: 4rem; color: #ccc;"></i>
+            <p class="lead mt-3">您的收藏夹是空的。</p>
+            <p>在商品页面点击 <i class="bi bi-heart-fill text-danger"></i> 即可收藏您喜欢的商品。</p>
+            <a href="{% url 'shop:product_list' %}" class="btn btn-primary mt-3">去逛逛</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

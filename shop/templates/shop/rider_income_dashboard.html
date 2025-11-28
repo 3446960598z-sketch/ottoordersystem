@@ -1,0 +1,102 @@
+{% extends "shop/base.html" %}
+{% block title %}收入仪表盘{% endblock %}
+
+{% block content %}
+  <h1 class="mb-4">收入仪表盘</h1>
+
+  <div class="row">
+    <div class="col-md-3">
+      <div class="card text-white bg-success mb-3">
+        <div class="card-header">总收入</div>
+        <div class="card-body">
+          <h4 class="card-title">¥{{ total_earnings|floatformat:2 }}</h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-white bg-info mb-3">
+        <div class="card-header">总完成订单</div>
+        <div class="card-body">
+          <h4 class="card-title">{{ total_orders }}</h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-white bg-primary mb-3">
+        <div class="card-header">今日收入</div>
+        <div class="card-body">
+          <h4 class="card-title">¥{{ today_earnings|floatformat:2 }}</h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-white bg-warning mb-3">
+        <div class="card-header">今日完成订单</div>
+        <div class="card-body">
+          <h4 class="card-title">{{ today_orders }}</h4>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mt-4">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            收入趋势
+            <div class="btn-group" role="group">
+                <a href="?period=7days" class="btn btn-sm btn-outline-secondary {% if request.GET.period == '7days' or not request.GET.period %}active{% endif %}">最近7天</a>
+                <a href="?period=30days" class="btn btn-sm btn-outline-secondary {% if request.GET.period == '30days' %}active{% endif %}">最近30天</a>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <canvas id="incomeTrendChart"></canvas>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const incomeTrendCtx = document.getElementById('incomeTrendChart').getContext('2d');
+
+    async function fetchChartData() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const period = urlParams.get('period') || '7days';
+        const response = await fetch(`{% url 'shop:rider_income_data' %}?period=${period}`);
+        const data = await response.json();
+
+        new Chart(incomeTrendCtx, {
+            type: 'line',
+            data: {
+                labels: data.income_trend.labels,
+                datasets: [{
+                    label: '每日收入',
+                    data: data.income_trend.data,
+                    borderColor: 'rgba(25, 135, 84, 1)',
+                    backgroundColor: 'rgba(25, 135, 84, 0.2)',
+                    fill: true,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value, index, values) {
+                                return '¥' + value;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    fetchChartData();
+});
+</script>
+{% endblock %}

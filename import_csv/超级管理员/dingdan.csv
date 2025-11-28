@@ -1,0 +1,21 @@
+user_username,shop_name,shipping_address_id,items,status,delivery_fee,created_at,paid_at
+user007,烧烤店,23,"[{""sku"": ""SKU311"", ""quantity"": 3}]",DELIVERED,1.0,2025-11-11 10:50:10,2025-11-11 11:00:10
+user005,麻辣烫,10,"[{""sku"": ""SKU120"", ""quantity"": 3}]",DELIVERED,1.0,2025-11-01 10:20:58,2025-11-01 10:26:58
+user019,水果捞,45,"[{""sku"": ""SKU225"", ""quantity"": 3}]",DELIVERED,1.0,2025-11-17 11:37:15,2025-11-17 11:46:15
+user019,烧烤店,19,"[{""sku"": ""SKU307"", ""quantity"": 2}, {""sku"": ""SKU327"", ""quantity"": 2}, {""sku"": ""SKU311"", ""quantity"": 1}]",DELIVERED,1.0,2025-10-29 00:13:01,2025-10-29 00:21:01
+user018,麻辣烫,59,"[{""sku"": ""SKU105"", ""quantity"": 2}, {""sku"": ""SKU123"", ""quantity"": 3}, {""sku"": ""SKU101"", ""quantity"": 3}]",DELIVERED,1.0,2025-11-10 15:05:47,2025-11-10 15:08:47
+user005,烧烤店,90,"[{""sku"": ""SKU317"", ""quantity"": 2}, {""sku"": ""SKU321"", ""quantity"": 2}]",DELIVERED,1.0,2025-11-01 00:15:50,2025-11-01 00:22:50
+user008,水果捞,27,"[{""sku"": ""SKU225"", ""quantity"": 3}, {""sku"": ""SKU218"", ""quantity"": 1}, {""sku"": ""SKU202"", ""quantity"": 3}]",DELIVERED,1.0,2025-11-04 19:16:06,2025-11-04 19:24:06
+user011,烧烤店,37,"[{""sku"": ""SKU325"", ""quantity"": 3}, {""sku"": ""SKU310"", ""quantity"": 3}]",DELIVERED,1.0,2025-10-30 08:45:50,2025-10-30 08:47:50
+user014,水果捞,46,"[{""sku"": ""SKU203"", ""quantity"": 2}, {""sku"": ""SKU212"", ""quantity"": 3}]",DELIVERED,1.0,2025-11-18 22:25:08,2025-11-18 22:29:08
+user007,水果捞,20,"[{""sku"": ""SKU206"", ""quantity"": 3}]",DELIVERED,1.0,2025-11-25 19:11:14,2025-11-25 19:18:14
+user013,烧烤店,10,"[{""sku"": ""SKU318"", ""quantity"": 2}, {""sku"": ""SKU316"", ""quantity"": 3}]",DELIVERED,1.0,2025-11-11 16:47:17,2025-11-11 16:49:17
+user003,烧烤店,69,"[{""sku"": ""SKU310"", ""quantity"": 2}]",DELIVERED,1.0,2025-11-22 22:41:43,2025-11-22 22:48:43
+user018,水果捞,99,"[{""sku"": ""SKU205"", ""quantity"": 3}, {""sku"": ""SKU226"", ""quantity"": 1}]",DELIVERED,1.0,2025-10-28 04:12:31,2025-10-28 04:13:31
+user005,水果捞,26,"[{""sku"": ""SKU220"", ""quantity"": 3}, {""sku"": ""SKU204"", ""quantity"": 3}, {""sku"": ""SKU203"", ""quantity"": 1}]",DELIVERED,1.0,2025-11-21 18:52:40,2025-11-21 19:01:40
+user012,烧烤店,79,"[{""sku"": ""SKU311"", ""quantity"": 3}, {""sku"": ""SKU327"", ""quantity"": 3}]",DELIVERED,1.0,2025-10-31 10:43:44,2025-10-31 10:45:44
+user020,烧烤店,55,"[{""sku"": ""SKU314"", ""quantity"": 1}, {""sku"": ""SKU326"", ""quantity"": 1}, {""sku"": ""SKU322"", ""quantity"": 3}]",DELIVERED,1.0,2025-11-19 08:09:16,2025-11-19 08:16:16
+user009,麻辣烫,73,"[{""sku"": ""SKU102"", ""quantity"": 3}]",DELIVERED,1.0,2025-11-12 03:00:48,2025-11-12 03:03:48
+user018,水果捞,74,"[{""sku"": ""SKU203"", ""quantity"": 2}, {""sku"": ""SKU218"", ""quantity"": 1}, {""sku"": ""SKU212"", ""quantity"": 2}]",DELIVERED,1.0,2025-11-13 10:07:58,2025-11-13 10:11:58
+user019,烧烤店,90,"[{""sku"": ""SKU318"", ""quantity"": 1}, {""sku"": ""SKU320"", ""quantity"": 3}]",DELIVERED,1.0,2025-11-19 03:33:04,2025-11-19 03:42:04
+user008,水果捞,62,"[{""sku"": ""SKU218"", ""quantity"": 1}, {""sku"": ""SKU226"", ""quantity"": 3}]",DELIVERED,1.0,2025-11-16 18:49:55,2025-11-16 18:51:55
