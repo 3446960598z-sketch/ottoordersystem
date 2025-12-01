@@ -4,41 +4,28 @@ from urllib.request import getproxies
 from django.core.cache import cache
 from django.db import connection
 from site_settings.models import SiteSetting
-import warnings
 
 # --- 0. 动态配置及缓存 ---
 def get_dynamic_setting(key, default_value):
-    """
-    从缓存或数据库获取配置。
-    - 首先尝试从缓存中获取。
-    - 如果缓存中没有，则从数据库中获取，并将其存入缓存。
-    - 缓存时间：成功获取的配置缓存10分钟，不存在的配置缓存1分钟。
-    """
     cache_key = f"site_setting:{key}"
     cached_value = cache.get(cache_key)
     if cached_value is not None:
         return cached_value
-
     try:
         if SiteSetting._meta.db_table not in connection.introspection.table_names():
             return default_value
-        
         setting = SiteSetting.objects.get(key=key)
         value = setting.value
-        cache.set(cache_key, value, timeout=600)  # 缓存10分钟
+        cache.set(cache_key, value, timeout=600)
         return value
     except SiteSetting.DoesNotExist:
-        cache.set(cache_key, default_value, timeout=60)  # 缓存“不存在”的结果1分钟
+        cache.set(cache_key, default_value, timeout=60)
         return default_value
     except Exception:
         return default_value
 
 # --- 1. 数据库查询工具 ---
 def query_database(sql_query: str):
-    """ 
-    执行一个只读的SQL查询并返回结果。
-    为了安全，只允许执行 SELECT 语句。
-    """
     if not sql_query.strip().upper().startswith('SELECT'):
         return json.dumps({"error": "为了安全，只允许执行 SELECT 查询。"})
     try:
@@ -54,7 +41,6 @@ def query_database(sql_query: str):
 
 # --- 2. AI 交互核心 ---
 
-# 默认系统提示词，当数据库中未设置时使用
 DEFAULT_SYSTEM_PROMPT = """
 你是一个智能数据库助手。你的名字叫“数问”。
 你的任务是根据用户的问题，生成并执行SQL查询来回答问题。
@@ -109,7 +95,7 @@ TOOLS = [
                 "properties": {
                     "sql_query": {
                         "type": "string",
-                        "description": "要执行的SELECT SQL查询语句。例如：SELECT p.name, p.price, c.name FROM shop_product AS p JOIN shop_productcategory AS c ON p.category_id = c.id WHERE p.price > 50;"
+                        "description": "要执行的SELECT SQL查询语句。"
                     }
                 },
                 "required": ["sql_query"]
@@ -119,10 +105,9 @@ TOOLS = [
 ]
 
 def get_ai_response(conversation):
-    """获取AI的回复（非流式）"""
     api_url = get_dynamic_setting('AI_ASSISTANT_URL', "")
     api_key = get_dynamic_setting('OPENAI_API_KEY', "")
-    
+
     if not api_url or not api_key:
         raise ValueError("AI服务未配置，请在后台设置API地址和密钥。")
 
@@ -138,45 +123,40 @@ def get_ai_response(conversation):
         "tool_choice": "auto",
         "stream": False
     }
-    
-    # 获取并规范化系统代理
-    system_proxies = getproxies()
-    proxies = {}
-    http_proxy = system_proxies.get('http')
-    
-    # 关键修复：如果存在http代理，则强制将其用于https流量，以覆盖错误的 "https://" 代理地址
-    if http_proxy and isinstance(http_proxy, str) and http_proxy.startswith('http://'):
-        proxies['http'] = http_proxy
-        proxies['https'] = http_proxy # 强制使用http代理
-    else:
-        # 如果没有http代理，则尝试使用https代理，并纠正其协议
-        https_proxy = system_proxies.get('https')
-        if https_proxy and isinstance(https_proxy, str):
-            normalized_proxy = https_proxy.replace('https://', 'http://')
-            proxies['http'] = normalized_proxy
-            proxies['https'] = normalized_proxy
 
-    warnings.filterwarnings('ignore', message='Unverified HTTPS request')
+    # --- 已禁用代理部分 ---
+    # proxies = {}
+    # try:
+    #     system_proxies = getproxies()
+    #     http_proxy = system_proxies.get('http')
+    #     https_proxy = system_proxies.get('https')
+    #     if http_proxy and isinstance(http_proxy, str) and http_proxy.startswith('http://'):
+    #         proxies['http'] = http_proxy
+    #         proxies['https'] = http_proxy
+    #     elif https_proxy and isinstance(https_proxy, str):
+    #         normalized_proxy = https_proxy.replace('https://', 'http://')
+    #         proxies['http'] = normalized_proxy
+    #         proxies['https'] = normalized_proxy
+    # except Exception:
+    #     pass
 
-    response = requests.post(api_url, headers=headers, json=payload, proxies=proxies, verify=False)
+    # 直接不使用代理
+    response = requests.post(api_url, headers=headers, json=payload)
+
     response.raise_for_status()
-    
     return response
 
 def process_ai_conversation(conversation):
-    """
-    处理完整的AI对话流程（非流式），返回最终的回复字符串。
-    """
     try:
         system_prompt_content = get_dynamic_setting('AI_SYSTEM_PROMPT', DEFAULT_SYSTEM_PROMPT)
         full_conversation = [{"role": "system", "content": system_prompt_content}] + conversation
 
         first_response = get_ai_response(full_conversation)
         ai_response_json = first_response.json()
-        
+
         response_message = ai_response_json["choices"][0]["message"]
         full_conversation.append(response_message)
-        
+
         if response_message.get("tool_calls"):
             tool_results_messages = []
             for tool_call in response_message["tool_calls"]:
@@ -190,9 +170,8 @@ def process_ai_conversation(conversation):
                         "tool_call_id": tool_call["id"],
                         "content": tool_result
                     })
-            
-            full_conversation.extend(tool_results_messages)
 
+            full_conversation.extend(tool_results_messages)
             final_response = get_ai_response(full_conversation)
             final_json = final_response.json()
             content = final_json["choices"][0]["message"]["content"]
@@ -201,12 +180,4 @@ def process_ai_conversation(conversation):
             return response_message.get("content", "")
 
     except Exception as e:
-        debug_info = "No proxy info available."
-        try:
-            system_proxies = getproxies()
-            filtered_proxies = {k: v for k, v in system_proxies.items() if isinstance(v, str) and v.startswith(('http://', 'https://'))}
-            debug_info = f"SystemProxies: {system_proxies}, FilteredProxies: {filtered_proxies}"
-        except Exception as proxy_e:
-            debug_info = f"Could not get proxy info: {proxy_e}"
-            
-        return f"请求AI服务时出错: {str(e)}. Debug: {debug_info}"
+        return f"请求AI服务时出错: {str(e)}"

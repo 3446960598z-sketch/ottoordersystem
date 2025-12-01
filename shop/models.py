@@ -4,6 +4,9 @@ from django.urls import reverse
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from PIL import Image
+from io import BytesIO
+from django.core.files.base import ContentFile
 
 # ===== 店铺与商品 =====
 class Shop(models.Model):
@@ -25,6 +28,35 @@ class Shop(models.Model):
 
     def get_absolute_url(self):
         return reverse('shop:shop_detail', args=[self.pk])
+
+    def save(self, *args, **kwargs):
+        if self.image:
+            # 打开图片
+            img = Image.open(self.image)
+
+            # 如果图片是 RGBA，转换为 RGB
+            if img.mode == 'RGBA':
+                img = img.convert('RGB')
+
+            # 设置新的尺寸，例如最大宽度为1024，高度按比例缩放
+            max_width = 1024
+            if img.width > max_width:
+                ratio = max_width / img.width
+                new_height = int(img.height * ratio)
+                img = img.resize((max_width, new_height), Image.LANCZOS)
+
+            # 压缩图片
+            buffer = BytesIO()
+            img.save(buffer, format='JPEG', quality=90)
+            buffer.seek(0)
+
+            # 创建一个新的文件名
+            image_name = f"{self.image.name.split('.')[0]}.jpg"
+            
+            # 用压缩后的图片替换原来的图片
+            self.image.save(image_name, ContentFile(buffer.getvalue()), save=False)
+
+        super().save(*args, **kwargs)
 
 class ProductCategory(models.Model):
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='categories', verbose_name='店铺')
@@ -63,6 +95,35 @@ class Product(models.Model):
     def get_absolute_url(self):
         return reverse('shop:product_detail', args=[self.pk])
 
+    def save(self, *args, **kwargs):
+        if self.image:
+            # 打开图片
+            img = Image.open(self.image)
+
+            # 如果图片是 RGBA，转换为 RGB
+            if img.mode == 'RGBA':
+                img = img.convert('RGB')
+
+            # 设置新的尺寸，例如最大宽度为1024，高度按比例缩放
+            max_width = 1024
+            if img.width > max_width:
+                ratio = max_width / img.width
+                new_height = int(img.height * ratio)
+                img = img.resize((max_width, new_height), Image.LANCZOS)
+
+            # 压缩图片
+            buffer = BytesIO()
+            img.save(buffer, format='JPEG', quality=90)
+            buffer.seek(0)
+
+            # 创建一个新的文件名
+            image_name = f"{self.image.name.split('.')[0]}.jpg"
+            
+            # 用压缩后的图片替换原来的图片
+            self.image.save(image_name, ContentFile(buffer.getvalue()), save=False)
+
+        super().save(*args, **kwargs)
+
 # ===== 平台管理 =====
 class Banner(models.Model):
     title = models.CharField('横幅标题', max_length=100, help_text="仅用于后台识别", default='默认标题')
@@ -79,6 +140,35 @@ class Banner(models.Model):
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        if self.image:
+            # 打开图片
+            img = Image.open(self.image)
+
+            # 如果图片是 RGBA，转换为 RGB
+            if img.mode == 'RGBA':
+                img = img.convert('RGB')
+
+            # 设置新的尺寸，例如最大宽度为1920，高度按比例缩放
+            max_width = 1920
+            if img.width > max_width:
+                ratio = max_width / img.width
+                new_height = int(img.height * ratio)
+                img = img.resize((max_width, new_height), Image.LANCZOS)
+
+            # 压缩图片
+            buffer = BytesIO()
+            img.save(buffer, format='JPEG', quality=85)
+            buffer.seek(0)
+
+            # 创建一个新的文件名
+            image_name = f"{self.image.name.split('.')[0]}.jpg"
+            
+            # 用压缩后的图片替换原来的图片
+            self.image.save(image_name, ContentFile(buffer.getvalue()), save=False)
+
+        super().save(*args, **kwargs)
 
     def clean(self):
         if self.linked_shop and self.linked_product:

@@ -14,7 +14,7 @@ def main():
     is_port_specified = any(':' in arg or arg.isdigit() for arg in sys.argv[2:])
 
     if is_runserver and not is_port_specified:
-        sys.argv.append('8080')
+        sys.argv.append('8080') # 设置默认的启动端口
 
     execute_from_command_line(sys.argv)
 

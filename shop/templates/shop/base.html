@@ -5,10 +5,18 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}点餐系统{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Bootstrap 样式（国内镜像） -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons（国内镜像） -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <!-- 自定义样式 -->
     <link rel="stylesheet" href="{% static 'shop/css/style.css' %}">
+
     {% block extra_head %}{% endblock %}
+    
     <style>
         #chatbot-container { position: fixed; bottom: 80px; right: 20px; width: 350px; max-width: 90%; z-index: 1050; display: none; }
         #chatbot-toggle-button { position: fixed; bottom: 20px; right: 20px; z-index: 1051; }
@@ -16,6 +24,7 @@
     </style>
 </head>
 <body>
+
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3 sticky-top">
     <div class="container">
