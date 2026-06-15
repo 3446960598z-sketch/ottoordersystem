@@ -6,3 +6,6 @@ media/
 *.log
 .env
 config.py
+.idea/
+*.sqlite3
+可登录的账号密码.txt
